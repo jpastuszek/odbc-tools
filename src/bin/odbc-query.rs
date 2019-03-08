@@ -1,5 +1,5 @@
 use cotton::prelude::*;
-use odbc_iter::{Odbc, Values};
+use odbc_iter::{Odbc, ValueRow};
 
 /// Query ODBC database
 #[derive(Debug, StructOpt)]
@@ -41,10 +41,10 @@ fn main() -> Result<(), Problem> {
     let args = Cli::from_args();
     init_logger(&args.logging, vec![module_path!(), "odbc_iter"]);
 
-    let mut env = Odbc::env().or_failed_to("open ODBC");
+    let mut odbc = Odbc::new().or_failed_to("initialize ODBC");
     match args.output {
         Output::ListDrivers => {
-            for driver in Odbc::list_drivers(&mut env).or_failed_to("list dirvers") {
+            for driver in odbc.list_drivers().or_failed_to("list dirvers") {
                 println!("{:?}", driver)
             }
             return Ok(());
@@ -53,10 +53,11 @@ fn main() -> Result<(), Problem> {
             connection_string,
             query: Query { query, parameters },
         } => {
-            let db = Odbc::connect(&env, &connection_string).or_failed_to("connect to database");
+            let mut db = odbc.connect(&connection_string).or_failed_to("connect to database");
+            let mut db = db.handle();
 
             let rows = db
-                .query_with_parameters::<Values, _>(&query, |q| {
+                .query_with_parameters::<ValueRow, _>(&query, |q| {
                     parameters
                         .iter()
                         .fold(Ok(q), |q, v| q.and_then(|q| q.bind(v)))
