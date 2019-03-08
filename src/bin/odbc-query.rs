@@ -1,11 +1,15 @@
 use cotton::prelude::*;
-use odbc_iter::{Odbc, ValueRow};
+use odbc_iter::{Odbc, Handle, ValueRow, Rows, Executed, TryFromRow};
+use odbc_iter::value::AsNullable;
 
 /// Query ODBC database
 #[derive(Debug, StructOpt)]
 struct Cli {
     #[structopt(flatten)]
     logging: LoggingOpt,
+
+    #[structopt(name = "connection-string")]
+    connection_string: String,
 
     #[structopt(subcommand)]
     output: Output,
@@ -20,9 +24,13 @@ enum Output {
     /// Print records with Rust Debug output
     #[structopt(name = "debug")]
     Debug {
-        #[structopt(name = "connection-string")]
-        connection_string: String,
+        #[structopt(flatten)]
+        query: Query,
+    },
 
+    /// Print records in vertical form
+    #[structopt(name = "vertical")]
+    Vertical {
         #[structopt(flatten)]
         query: Query,
     },
@@ -31,10 +39,22 @@ enum Output {
 #[derive(Debug, StructOpt)]
 struct Query {
     #[structopt(name = "query")]
-    query: Option<String>,
+    text: Option<String>,
 
     #[structopt(name = "parameters")]
     parameters: Vec<String>,
+}
+
+fn execute<'h, 'c, 'o, T: TryFromRow>(handle: &'h mut Handle<'c, 'o>, query: Query) -> Rows<'h, 'c, T, Executed> {
+    let text = query.text.unwrap_or_else(|| read_stdin());
+    let parameters = query.parameters;
+
+    handle.query_with_parameters(&text, |q| {
+            parameters
+                .iter()
+                .fold(Ok(q), |q, v| q.and_then(|q| q.bind(v)))
+        })
+        .or_failed_to("execut query")
 }
 
 fn main() -> Result<(), Problem> {
@@ -49,27 +69,33 @@ fn main() -> Result<(), Problem> {
             }
             return Ok(());
         }
-        Output::Debug {
-            connection_string,
-            query: Query { query, parameters },
-        } => {
-            let mut db = odbc.connect(&connection_string).or_failed_to("connect to database");
-            let mut db = db.handle();
+        _ => ()
+    }
 
-            let query = query.unwrap_or_else(|| read_stdin());
+    let mut db = odbc.connect(&args.connection_string).or_failed_to("connect to database");
+    let mut db = db.handle();
 
-            let rows = db
-                .query_with_parameters::<ValueRow, _>(&query, |q| {
-                    parameters
-                        .iter()
-                        .fold(Ok(q), |q, v| q.and_then(|q| q.bind(v)))
-                })
-                .or_failed_to("execut query");
-
-            for row in rows {
-                println!("{:?}", row.or_failed_to("fetch row data"))
+    match args.output {
+        Output::Debug { query } => {
+            for row in execute::<ValueRow>(&mut db, query).or_failed_to("fetch row data") {
+                println!("{:?}", row)
             }
         }
+        Output::Vertical { query } => {
+            let rows = execute::<ValueRow>(&mut db, query);
+            let schema = rows.schema().iter().map(|c| c.name.to_owned()).collect::<Vec<_>>();
+            let max_width = schema.iter().map(|c| c.len()).max().unwrap_or(0);
+
+            for (i, row) in rows.or_failed_to("fetch row data").enumerate() {
+                if i > 0 {
+                    println!();
+                }
+                for (value, column) in row.into_iter().zip(schema.iter()) {
+                    println!("{:<3} {:width$} {}", i, column, value.as_nullable(), width = max_width);
+                }
+            }
+        }
+        _ => ()
     }
 
     Ok(())
