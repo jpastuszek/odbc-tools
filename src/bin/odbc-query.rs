@@ -31,7 +31,7 @@ enum Output {
 #[derive(Debug, StructOpt)]
 struct Query {
     #[structopt(name = "query")]
-    query: String,
+    query: Option<String>,
 
     #[structopt(name = "parameters")]
     parameters: Vec<String>,
@@ -55,6 +55,8 @@ fn main() -> Result<(), Problem> {
         } => {
             let mut db = odbc.connect(&connection_string).or_failed_to("connect to database");
             let mut db = db.handle();
+
+            let query = query.unwrap_or_else(|| read_stdin());
 
             let rows = db
                 .query_with_parameters::<ValueRow, _>(&query, |q| {
