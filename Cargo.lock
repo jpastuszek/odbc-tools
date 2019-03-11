@@ -234,6 +234,7 @@ dependencies = [
 [[package]]
 name = "odbc-iter"
 version = "0.1.0"
+source = "git+https://github.com/jpastuszek/odbc-iter.git#e3cc228f3406dff0b489d5e2a54b6fcf301b687f"
 dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-context 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -261,7 +262,7 @@ name = "odbc-tools"
 version = "0.1.0"
 dependencies = [
  "cotton 0.1.0 (git+https://github.com/jpastuszek/cotton.git)",
- "odbc-iter 0.1.0",
+ "odbc-iter 0.1.0 (git+https://github.com/jpastuszek/odbc-iter.git)",
  "structopt 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -629,6 +630,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum num-integer 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)" = "e83d528d2677f0518c570baf2b7abdcf0cd2d248860b68507bdcb3e91d4c0cea"
 "checksum num-traits 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "0b3a5d7cc97d6d30d8b9bc8fa19bf45349ffe46241e8816f50f62f6d6aaabee1"
 "checksum odbc 0.10.1 (git+https://github.com/jpastuszek/odbc-rs)" = "<none>"
+"checksum odbc-iter 0.1.0 (git+https://github.com/jpastuszek/odbc-iter.git)" = "<none>"
 "checksum odbc-safe 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f57e420b988c9d41005b33da6710bc1a657f2ce540a951c8aeb1d23ce1615502"
 "checksum odbc-sys 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)" = "824b45fb2d67a9cab7bfe8c3e7d543b34935764d2d0eee15373ef85dd5988b72"
 "checksum problem 5.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6670e7aa4a17459ca60c0f2f07ddeefa4688d81b8bad62c929283cedc537e24f"

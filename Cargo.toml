@@ -7,4 +7,4 @@ edition = "2018"
 [dependencies]
 cotton = { git = "https://github.com/jpastuszek/cotton.git" }
 structopt = "0.2.14"
-odbc-iter = { path = "../odbc-iter" }
+odbc-iter = { git = "https://github.com/jpastuszek/odbc-iter.git" }
