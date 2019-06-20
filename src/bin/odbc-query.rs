@@ -80,7 +80,6 @@ fn main() -> Result<(), Problem> {
                 }
             }
         }
-        _ => ()
     }
 
     Ok(())
