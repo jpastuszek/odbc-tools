@@ -16,10 +16,6 @@ struct Cli {
 
 #[derive(Debug, StructOpt)]
 enum Output {
-    /// List ODBC drivers and exit
-    #[structopt(name = "list_drivers")]
-    ListDrivers,
-
     /// Print records with Rust Debug output
     #[structopt(name = "debug")]
     Debug {
@@ -60,17 +56,7 @@ fn main() -> Result<(), Problem> {
     let args = Cli::from_args();
     init_logger(&args.logging, vec![module_path!(), "odbc_iter"]);
 
-    let mut odbc = Odbc::new().or_failed_to("initialize ODBC");
-    match args.output {
-        Output::ListDrivers => {
-            for driver in odbc.list_drivers().or_failed_to("list dirvers") {
-                println!("{:?}", driver)
-            }
-            return Ok(());
-        }
-        _ => ()
-    }
-
+    let odbc = Odbc::new().or_failed_to("initialize ODBC");
     let mut db = odbc.connect(&args.connection_string).or_failed_to("connect to database");
     let mut db = db.handle();
 
