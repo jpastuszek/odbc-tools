@@ -6,17 +6,13 @@ use odbc_iter::Odbc;
 struct Cli {
     #[structopt(flatten)]
     logging: LoggingOpt,
-
-    #[structopt(name = "connection-string")]
-    connection_string: String,
 }
 
 fn main() -> Result<(), Problem> {
     let args = Cli::from_args();
     init_logger(&args.logging, vec![module_path!(), "odbc_iter"]);
 
-    let mut odbc = Odbc::new().or_failed_to("initialize ODBC");
-    for driver in odbc.list_drivers().or_failed_to("list dirvers") {
+    for driver in Odbc::list_drivers().or_failed_to("list dirvers") {
         println!("{:?}", driver)
     }
     Ok(())

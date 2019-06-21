@@ -40,7 +40,7 @@ struct Query {
     parameters: Vec<String>,
 }
 
-fn execute<'h, 'c, 'o, T: TryFromValueRow>(handle: &'h mut Handle<'c, 'o>, query: Query) -> ResultSet<'h, 'c, T, Executed> {
+fn execute<'h, 'c, T: TryFromValueRow>(handle: &'h mut Handle<'c>, query: Query) -> ResultSet<'h, 'c, T, Executed> {
     let text = query.text.unwrap_or_else(|| read_stdin());
     let parameters = query.parameters;
 
@@ -56,8 +56,7 @@ fn main() -> Result<(), Problem> {
     let args = Cli::from_args();
     init_logger(&args.logging, vec![module_path!(), "odbc_iter"]);
 
-    let odbc = Odbc::new().or_failed_to("initialize ODBC");
-    let mut db = odbc.connect(&args.connection_string).or_failed_to("connect to database");
+    let mut db = Odbc::connect(&args.connection_string).or_failed_to("connect to database");
     let mut db = db.handle();
 
     match args.output {

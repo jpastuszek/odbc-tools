@@ -236,7 +236,7 @@ dependencies = [
 [[package]]
 name = "odbc-iter"
 version = "0.1.0"
-source = "git+https://github.com/jpastuszek/odbc-iter.git#d6f54f9ef0d41b14d3df286f0a9ad8b757b6eddb"
+source = "git+https://github.com/jpastuszek/odbc-iter.git#2291dedabf2864a83a456e44cbf671a73b5cf744"
 dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-context 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
