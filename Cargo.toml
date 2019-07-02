@@ -1,10 +1,15 @@
 [package]
 name = "odbc-tools"
 version = "0.1.0"
-authors = ["Jakub Pastuszek <jpastuszek@gmail.com>"]
+authors = ["Jakub Pastuszek <jpastuszek@protonmail.com>"]
+description = "Command line interface tools to query databases with via native ODBC drivers"
+readme = "README.md"
+keywords = ["odbc", "cli", "database"]
+categories = ["command-line-utilities", "database"]
+license = "MIT"
 edition = "2018"
 
 [dependencies]
-cotton = { git = "https://github.com/jpastuszek/cotton.git" }
+cotton = "0.0.1"
 structopt = "0.2.14"
-odbc-iter = { git = "https://github.com/jpastuszek/odbc-iter.git", features = ["serde_json"] }
+odbc-iter = { version = "0.1.0", features = ["serde_json"] }
