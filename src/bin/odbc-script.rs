@@ -29,13 +29,13 @@ fn main() -> Result<(), Problem> {
         }
 
         let rows = db.query::<ValueRow>(query).or_failed_to("execute query");
-        let schema = rows.column_names().to_vec();
-        let max_width = schema.iter().map(|c| c.len()).max().unwrap_or(0);
+        let column_names = rows.schema().iter().map(|s| s.name.clone()).collect::<Vec<_>>();
+        let max_width = column_names.iter().map(|c| c.len()).max().unwrap_or(0);
         for (i, row) in rows.or_failed_to("fetch row data").enumerate() {
             if i > 0 {
                 println!();
             }
-            for (value, column) in row.into_iter().zip(schema.iter()) {
+            for (value, column) in row.into_iter().zip(column_names.iter()) {
                 println!("{:>3} {:<3} {:width$} {}", q, i, column, value.as_nullable(), width = max_width);
             }
         }

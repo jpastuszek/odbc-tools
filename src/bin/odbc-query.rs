@@ -1,5 +1,5 @@
 use cotton::prelude::*;
-use odbc_iter::{Odbc, Handle, ValueRow, ResultSet, Executed, TryFromValueRow, AsNullable};
+use odbc_iter::{Odbc, Handle, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
 
 /// Query ODBC database
 #[derive(Debug, StructOpt)]
@@ -40,7 +40,7 @@ struct Query {
     parameters: Vec<String>,
 }
 
-fn execute<'h, 'c, T: TryFromValueRow>(handle: &'h mut Handle<'c>, query: Query) -> ResultSet<'h, 'c, T, Executed> {
+fn execute<'h, 'c, T: TryFromRow>(handle: &'h mut Handle<'c>, query: Query) -> ResultSet<'h, 'c, T, Executed> {
     let text = query.text.unwrap_or_else(|| read_stdin());
     let parameters = query.parameters;
 
@@ -67,14 +67,14 @@ fn main() -> Result<(), Problem> {
         }
         Output::Vertical { query } => {
             let rows = execute::<ValueRow>(&mut db, query);
-            let schema = rows.column_names().to_vec();
-            let max_width = schema.iter().map(|c| c.len()).max().unwrap_or(0);
+            let column_names = rows.schema().iter().map(|s| s.name.clone()).collect::<Vec<_>>();
+            let max_width = column_names.iter().map(|c| c.len()).max().unwrap_or(0);
 
             for (i, row) in rows.or_failed_to("fetch row data").enumerate() {
                 if i > 0 {
                     println!();
                 }
-                for (value, column) in row.into_iter().zip(schema.iter()) {
+                for (value, column) in row.into_iter().zip(column_names.iter()) {
                     println!("{:<3} {:width$} {}", i, column, value.as_nullable(), width = max_width);
                 }
             }
