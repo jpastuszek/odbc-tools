@@ -17,7 +17,7 @@ odbc-query
 
 Run query and print result set with given formatting.
 
-# In vertical format
+### In vertical format
 
 ```sh
 odbc-query $CONNECTION_STRING vertical "select * from sys.tables limit 2"
@@ -46,7 +46,7 @@ Example output:
 1   temporary     0
 ```
 
-# In JSON array format
+### In JSON array format
 
 ```sh
 odbc-query $CONNECTION_STRING json-array "select * from sys.tables limit 2"
