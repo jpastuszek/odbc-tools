@@ -1,5 +1,6 @@
 use cotton::prelude::*;
 use odbc_iter::{Odbc, Handle, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
+use serde_json;
 
 /// Query ODBC database
 #[derive(Debug, StructOpt)]
@@ -26,6 +27,13 @@ enum Output {
     /// Print records in vertical form
     #[structopt(name = "vertical")]
     Vertical {
+        #[structopt(flatten)]
+        query: Query,
+    },
+
+    /// Print records in JSON array form
+    #[structopt(name = "json-array")]
+    JsonArray {
         #[structopt(flatten)]
         query: Query,
     },
@@ -77,6 +85,11 @@ fn main() -> Result<(), Problem> {
                 for (value, column) in row.into_iter().zip(column_names.iter()) {
                     println!("{:<3} {:width$} {}", i, column, value.as_nullable(), width = max_width);
                 }
+            }
+        }
+        Output::JsonArray { query } => {
+            for row in execute::<ValueRow>(&mut db, query).or_failed_to("fetch row data") {
+                println!("{}", serde_json::to_string(&row).or_failed_to("serialize JSON"))
             }
         }
     }

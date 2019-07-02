@@ -1,4 +1,4 @@
-Command line interface tools to query databases with via native ODBC drivers using 'odbc-iter' and 'odbc' crates.
+Command line interface tools to query databases with via native ODBC drivers using 'odbc-iter' and 'odbc' Rust crates.
 
 Installation
 ===========
@@ -16,6 +16,8 @@ odbc-query
 -----------
 
 Run query and print result set with given formatting.
+
+# In vertical format
 
 ```sh
 odbc-query $CONNECTION_STRING vertical "select * from sys.tables limit 2"
@@ -42,6 +44,18 @@ Example output:
 1   commit_action 0
 1   access        0
 1   temporary     0
+```
+
+# In JSON array format
+
+```sh
+odbc-query $CONNECTION_STRING json-array "select * from sys.tables limit 2"
+```
+
+Example output:
+```
+[2001,"schemas",2000,null,10,true,0,0,0]
+[2007,"types",2000,null,10,true,0,0,0]
 ```
 
 odbc-drivers
