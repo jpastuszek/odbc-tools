@@ -46,6 +46,10 @@ enum Output {
         #[structopt(long = "show-schema")]
         show_schema: bool,
 
+        /// Use deflate compression
+        #[structopt(long = "deflate")]
+        deflate: bool,
+
         /// Schema name
         #[structopt(long = "schema-name", default_value = "result_set")]
         schema_name: String,
@@ -110,11 +114,16 @@ fn main() -> Result<(), Problem> {
                 println!("{}", serde_json::to_string(&row).or_failed_to("serialize JSON"))
             }
         }
-        Output::AvroRecord { show_schema: true, schema_name, query } => {
+        Output::AvroRecord { show_schema: true, schema_name, query, .. } => {
             println!("{}", query.execute::<ValueRow>(&mut db).schema().to_avro_schema(&schema_name).or_failed_to("show Avro schema").canonical_form());
         }
-        Output::AvroRecord { show_schema: false, schema_name, query } => {
-            query.execute(&mut db).write_avro(&mut stdout(), odbc_avro::Codec::Deflate, &schema_name).or_failed_to("write query result set as Avro data");
+        Output::AvroRecord { show_schema: false, schema_name, query, deflate } => {
+            let codec = if deflate {
+                odbc_avro::Codec::Deflate
+            } else {
+                odbc_avro::Codec::Null
+            };
+            query.execute(&mut db).write_avro(&mut stdout(), codec, &schema_name).or_failed_to("write query result set as Avro data");
         }
     }
 
