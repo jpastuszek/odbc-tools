@@ -14,3 +14,4 @@ cotton = "0.0.1"
 structopt = "0.2.14"
 odbc-iter = { version = "0.1.0", features = ["serde_json", "serde"] }
 serde_json = "1.0.40"
+odbc-avro = { git = "https://github.com/jpastuszek/odbc-avro.git" }
