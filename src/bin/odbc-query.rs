@@ -1,6 +1,6 @@
 use cotton::prelude::*;
 use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
-use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration};
+use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration, TimestampFormat, ReformatJson};
 use serde_json;
 
 /// Query ODBC database
@@ -50,6 +50,18 @@ enum Output {
         #[structopt(long = "deflate")]
         deflate: bool,
 
+        /// Parse and format JSON
+        #[structopt(long = "reformat-json")]
+        reformat_json: bool,
+
+        /// If reformatting JSON use pretty format
+        #[structopt(long = "reformat-json-pretty")]
+        reformat_json_pretty: bool,
+
+        /// Represent timestamp as number of millisceconds since epoch instead of string
+        #[structopt(long = "timestamp-millis")]
+        timestamp_millis: bool,
+
         /// Schema name
         #[structopt(long = "schema-name", default_value = "result_set")]
         schema_name: String,
@@ -79,6 +91,21 @@ impl Query {
                     .fold(Ok(q), |q, v| q.and_then(|q| q.bind(v)))
             })
             .or_failed_to("execut query")
+    }
+}
+
+fn make_avro_configuration(reformat_json: bool, reformat_json_pretty: bool, timestamp_millis: bool) -> AvroConfiguration {
+    AvroConfiguration {
+        reformat_json: match (reformat_json, reformat_json_pretty) {
+            (true, true) => Some(ReformatJson::Pretty),
+            (true, false) => Some(ReformatJson::Compact),
+            (false, _) => None,
+        },
+        timestamp_format: if timestamp_millis {
+            TimestampFormat::MillisecondsSinceEpoch
+        } else {
+            TimestampFormat::DefaultString
+        }
     }
 }
 
@@ -114,12 +141,12 @@ fn main() -> Result<(), Problem> {
                 println!("{}", serde_json::to_string(&row).or_failed_to("serialize JSON"))
             }
         }
-        Output::AvroRecord { show_schema: true, schema_name, query, .. } => {
-            let mut db = db.with_configuration(AvroConfiguration::default());
+        Output::AvroRecord { show_schema: true, schema_name, query, reformat_json, reformat_json_pretty, timestamp_millis, .. } => {
+            let mut db = db.with_configuration(make_avro_configuration(reformat_json, reformat_json_pretty, timestamp_millis));
             println!("{}", query.execute::<AvroRowRecord, _>(&mut db).avro_schema(&schema_name).or_failed_to("show Avro schema").canonical_form());
         }
-        Output::AvroRecord { show_schema: false, schema_name, query, deflate } => {
-            let mut db = db.with_configuration(AvroConfiguration::default());
+        Output::AvroRecord { show_schema: false, schema_name, query, deflate, reformat_json, reformat_json_pretty, timestamp_millis } => {
+            let mut db = db.with_configuration(make_avro_configuration(reformat_json, reformat_json_pretty, timestamp_millis));
             let codec = if deflate {
                 odbc_avro::Codec::Deflate
             } else {

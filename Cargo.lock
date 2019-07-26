@@ -309,7 +309,7 @@ dependencies = [
 [[package]]
 name = "odbc-avro"
 version = "0.1.0"
-source = "git+https://github.com/jpastuszek/odbc-avro.git#2b08663608b6380941faa9e7f9ca371f4309685a"
+source = "git+https://github.com/jpastuszek/odbc-avro.git#e24908c59eacfb6b8674e471b9b59f73dda430b2"
 dependencies = [
  "avro-rs 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -322,7 +322,7 @@ dependencies = [
 [[package]]
 name = "odbc-iter"
 version = "0.1.2-alpha.0"
-source = "git+https://github.com/jpastuszek/odbc-iter#ed3e32fc5fed404249ed3f74b7cd63810186bea8"
+source = "git+https://github.com/jpastuszek/odbc-iter#8c27463428014ccd94ef5f2fa971552aedead7dc"
 dependencies = [
  "chrono 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-context 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
