@@ -309,20 +309,20 @@ dependencies = [
 [[package]]
 name = "odbc-avro"
 version = "0.1.0"
-source = "git+https://github.com/jpastuszek/odbc-avro.git#e24908c59eacfb6b8674e471b9b59f73dda430b2"
+source = "git+https://github.com/jpastuszek/odbc-avro.git#d9b5182566ab868f5e6a00abec4a1bab031c866c"
 dependencies = [
  "avro-rs 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "odbc-iter 0.1.2-alpha.0 (git+https://github.com/jpastuszek/odbc-iter)",
+ "odbc-iter 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "odbc-iter"
-version = "0.1.2-alpha.0"
-source = "git+https://github.com/jpastuszek/odbc-iter#8c27463428014ccd94ef5f2fa971552aedead7dc"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "chrono 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-context 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -353,7 +353,7 @@ version = "0.1.1-alpha.0"
 dependencies = [
  "cotton 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "odbc-avro 0.1.0 (git+https://github.com/jpastuszek/odbc-avro.git)",
- "odbc-iter 0.1.2-alpha.0 (git+https://github.com/jpastuszek/odbc-iter)",
+ "odbc-iter 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.2.15 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -766,7 +766,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum num-traits 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "0b3a5d7cc97d6d30d8b9bc8fa19bf45349ffe46241e8816f50f62f6d6aaabee1"
 "checksum odbc 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9f0aac23348ebe8bbbbc9ca817ac619a59714f51ba2ba8d52e502184890fe7d0"
 "checksum odbc-avro 0.1.0 (git+https://github.com/jpastuszek/odbc-avro.git)" = "<none>"
-"checksum odbc-iter 0.1.2-alpha.0 (git+https://github.com/jpastuszek/odbc-iter)" = "<none>"
+"checksum odbc-iter 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3df76b25079a7326165cda1827264e0b9cdf365cf204b15cd3249693c82d7eaf"
 "checksum odbc-safe 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f57e420b988c9d41005b33da6710bc1a657f2ce540a951c8aeb1d23ce1615502"
 "checksum odbc-sys 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)" = "824b45fb2d67a9cab7bfe8c3e7d543b34935764d2d0eee15373ef85dd5988b72"
 "checksum problem 5.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5eebcaddac13b19525a20492866ea9d94b0ef4e1a37dab7b1a113250de317b3d"
