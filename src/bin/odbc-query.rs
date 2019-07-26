@@ -1,6 +1,6 @@
 use cotton::prelude::*;
-use odbc_iter::{Odbc, Handle, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
-use odbc_avro::{ToAvroSchema, WriteAvro};
+use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
+use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration};
 use serde_json;
 
 /// Query ODBC database
@@ -69,7 +69,7 @@ struct Query {
 }
 
 impl Query {
-    fn execute<'h, 'c, T: TryFromRow>(self, handle: &'h mut Handle<'c>) -> ResultSet<'h, 'c, T, Executed> {
+    fn execute<'h, 'c, T: TryFromRow<C>, C: Configuration + 'h>(self, handle: &'h mut Handle<'c, C>) -> ResultSet<'h, 'c, T, Executed, C> {
         let text = self.text.unwrap_or_else(|| read_stdin());
         let parameters = self.parameters;
 
@@ -91,12 +91,12 @@ fn main() -> Result<(), Problem> {
 
     match args.output {
         Output::Debug { query } => {
-            for row in query.execute::<ValueRow>(&mut db).or_failed_to("fetch row data") {
+            for row in query.execute::<ValueRow, _>(&mut db).or_failed_to("fetch row data") {
                 println!("{:?}", row)
             }
         }
         Output::Vertical { query } => {
-            let rows = query.execute::<ValueRow>(&mut db);
+            let rows = query.execute::<ValueRow, _>(&mut db);
             let column_names = rows.schema().iter().map(|s| s.name.clone()).collect::<Vec<_>>();
             let max_width = column_names.iter().map(|c| c.len()).max().unwrap_or(0);
 
@@ -110,14 +110,16 @@ fn main() -> Result<(), Problem> {
             }
         }
         Output::JsonArray { query } => {
-            for row in query.execute::<ValueRow>(&mut db).or_failed_to("fetch row data") {
+            for row in query.execute::<ValueRow, _>(&mut db).or_failed_to("fetch row data") {
                 println!("{}", serde_json::to_string(&row).or_failed_to("serialize JSON"))
             }
         }
         Output::AvroRecord { show_schema: true, schema_name, query, .. } => {
-            println!("{}", query.execute::<ValueRow>(&mut db).schema().to_avro_schema(&schema_name).or_failed_to("show Avro schema").canonical_form());
+            let mut db = db.with_configuration(AvroConfiguration::default());
+            println!("{}", query.execute::<AvroRowRecord, _>(&mut db).avro_schema(&schema_name).or_failed_to("show Avro schema").canonical_form());
         }
         Output::AvroRecord { show_schema: false, schema_name, query, deflate } => {
+            let mut db = db.with_configuration(AvroConfiguration::default());
             let codec = if deflate {
                 odbc_avro::Codec::Deflate
             } else {
