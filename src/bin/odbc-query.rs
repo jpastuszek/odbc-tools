@@ -105,7 +105,8 @@ fn make_avro_configuration(reformat_json: bool, reformat_json_pretty: bool, time
             TimestampFormat::MillisecondsSinceEpoch
         } else {
             TimestampFormat::DefaultString
-        }
+        },
+        .. AvroConfiguration::default()
     }
 }
 
