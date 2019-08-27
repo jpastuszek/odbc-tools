@@ -1,3 +1,5 @@
+[![Latest Version]][crates.io] [![Documentation]][docs.rs] ![License]
+
 Command line interface tools to query databases with via native ODBC drivers using 'odbc-iter' and 'odbc' Rust crates.
 
 Installation
@@ -108,3 +110,9 @@ Example output:
 
   1 0   foo 1
 ```
+
+[crates.io]: https://crates.io/crates/odbc-tools
+[Latest Version]: https://img.shields.io/crates/v/odbc-tools.svg
+[Documentation]: https://docs.rs/odbc-tools/badge.svg
+[docs.rs]: https://docs.rs/odbc-tools
+[License]: https://img.shields.io/crates/l/odbc-tools.svg
