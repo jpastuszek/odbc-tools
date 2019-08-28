@@ -1,6 +1,6 @@
 use cotton::prelude::*;
 use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
-use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration, TimestampFormat, ReformatJson};
+use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration, TimestampFormat, ReformatJson, AvroConfigurationBuilder};
 use serde_json;
 
 /// Query ODBC database
@@ -39,7 +39,7 @@ enum Output {
         query: Query,
     },
 
-    /// Serilize to Avro binary format one "record" per row
+    /// Serilize to Avro "Object Container File" format one "record" per row
     #[structopt(name = "avro-record")]
     AvroRecord {
         /// Print Avro schema only
@@ -95,19 +95,18 @@ impl Query {
 }
 
 fn make_avro_configuration(reformat_json: bool, reformat_json_pretty: bool, timestamp_millis: bool) -> AvroConfiguration {
-    AvroConfiguration {
-        reformat_json: match (reformat_json, reformat_json_pretty) {
+    AvroConfigurationBuilder::default()
+        .with_reformat_json(match (reformat_json, reformat_json_pretty) {
             (true, true) => Some(ReformatJson::Pretty),
             (true, false) => Some(ReformatJson::Compact),
             (false, _) => None,
-        },
-        timestamp_format: if timestamp_millis {
+        })
+        .with_timestamp_format(if timestamp_millis {
             TimestampFormat::MillisecondsSinceEpoch
         } else {
             TimestampFormat::DefaultString
-        },
-        .. AvroConfiguration::default()
-    }
+        })
+        .build()
 }
 
 fn main() -> Result<(), Problem> {
