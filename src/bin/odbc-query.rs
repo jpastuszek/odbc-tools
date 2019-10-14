@@ -2,6 +2,7 @@ use cotton::prelude::*;
 use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
 use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration, TimestampFormat, ReformatJson, AvroConfigurationBuilder};
 use serde_json;
+use structopt::StructOpt;
 
 /// Query ODBC database
 #[derive(Debug, StructOpt)]
@@ -71,18 +72,28 @@ enum Output {
     },
 }
 
+fn minus_none(v: String) -> Option<String> {
+    if v == "-" {
+        None
+    } else {
+        Some(v)
+    }
+}
+
 #[derive(Debug, StructOpt)]
 struct Query {
+    /// Query text or '-' to force to read query from stdin
     #[structopt(name = "query")]
     text: Option<String>,
 
+    /// Parameter values to bind to query
     #[structopt(name = "parameters")]
     parameters: Vec<String>,
 }
 
 impl Query {
     fn execute<'h, 'c, T: TryFromRow<C>, C: Configuration + 'h>(self, handle: &'h mut Handle<'c, C>) -> ResultSet<'h, 'c, T, Executed, C> {
-        let text = self.text.unwrap_or_else(|| read_stdin());
+        let text = self.text.and_then(minus_none).unwrap_or_else(|| read_stdin());
         let parameters = self.parameters;
 
         handle.query_with_parameters(&text, |q| {
