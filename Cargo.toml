@@ -1,6 +1,6 @@
 [package]
 name = "odbc-tools"
-version = "1.0.0"
+version = "1.0.1-alpha.0"
 authors = ["Jakub Pastuszek <jpastuszek@protonmail.com>"]
 description = "Command line interface tools to query databases with via native ODBC drivers"
 repository = "https://github.com/jpastuszek/odbc-tools"
