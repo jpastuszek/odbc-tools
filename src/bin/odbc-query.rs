@@ -1,5 +1,5 @@
 use cotton::prelude::*;
-use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable};
+use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable, ColumnType};
 use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration, TimestampFormat, ReformatJson, AvroConfigurationBuilder};
 use serde_json;
 use structopt::StructOpt;
@@ -19,6 +19,13 @@ struct Cli {
 
 #[derive(Debug, StructOpt)]
 enum Output {
+    /// Print schema of the query
+    #[structopt(name = "schema")]
+    Schema {
+        #[structopt(flatten)]
+        query: Query,
+    },
+
     /// Print records with Rust Debug output
     #[structopt(name = "debug")]
     Debug {
@@ -103,6 +110,15 @@ impl Query {
             })
             .or_failed_to("execut query")
     }
+
+    fn schema<'h, 'c, C: Configuration + 'h>(self, handle: &'h mut Handle<'c, C>) -> Vec<ColumnType> {
+        let text = self.text.and_then(minus_none).unwrap_or_else(|| read_stdin());
+
+        handle.prepare(&text)
+            .or_failed_to("prepare query")
+            .schema()
+            .or_failed_to("get prepared statement schema")
+    }
 }
 
 fn make_avro_configuration(reformat_json: bool, reformat_json_pretty: bool, timestamp_millis: bool) -> AvroConfiguration {
@@ -128,6 +144,16 @@ fn main() -> Result<(), Problem> {
     let mut db = db.handle();
 
     match args.output {
+        Output::Schema { query } => {
+            println!("column name\tdatum type\tODBC type\tnullable");
+            for column in query.schema(&mut db) {
+                println!("{name}\t{datum_type:?}\t{odbc_type:?}\t{nullable}",
+                         name = column.name,
+                         datum_type = column.datum_type,
+                         odbc_type = column.odbc_type,
+                         nullable = column.nullable);
+            }
+        }
         Output::Debug { query } => {
             for row in query.execute::<ValueRow, _>(&mut db).or_failed_to("fetch row data") {
                 println!("{:?}", row)
