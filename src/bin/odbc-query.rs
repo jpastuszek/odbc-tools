@@ -33,6 +33,17 @@ enum Output {
         query: Query,
     },
 
+    /// Print single column value of single row
+    #[structopt(name = "value")]
+    Value {
+        /// Allow NULL value
+        #[structopt(long = "allow-null", short = "n")]
+        allow_null: bool,
+
+        #[structopt(flatten)]
+        query: Query,
+    },
+
     /// Print records in vertical form
     #[structopt(name = "vertical")]
     Vertical {
@@ -158,6 +169,18 @@ fn main() -> Result<(), Problem> {
             for row in query.execute::<ValueRow, _>(&mut db).or_failed_to("fetch row data") {
                 println!("{:?}", row)
             }
+        }
+        Output::Value { query, allow_null } => {
+            let row = query.execute::<ValueRow, _>(&mut db).single().or_failed_to("fetch single row");
+            let mut row = row.into_iter();
+            let v = row.next().or_failed_to("get value");
+            if row.next().is_some() {
+                panic!("Expected single column but got more");
+            }
+            if !allow_null && v.is_none() {
+                panic!("Expected single not null column value but got NULL");
+            }
+            println!("{}", v.as_nullable());
         }
         Output::Vertical { query } => {
             let rows = query.execute::<ValueRow, _>(&mut db);
