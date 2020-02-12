@@ -1,5 +1,5 @@
 use cotton::prelude::*;
-use odbc_iter::{Odbc, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable, ColumnType};
+use odbc_iter::{Odbc, Settings, Handle, Configuration, ValueRow, ResultSet, Executed, TryFromRow, AsNullable, ColumnType};
 use odbc_avro::{AvroRowRecord, AvroResultSet, AvroConfiguration, TimestampFormat, ReformatJson, AvroConfigurationBuilder};
 use serde_json;
 use structopt::StructOpt;
@@ -9,6 +9,10 @@ use structopt::StructOpt;
 struct Cli {
     #[structopt(flatten)]
     logging: LoggingOpt,
+
+    /// Decode strings as UTF-16 (e.g. for SQL Server)
+    #[structopt(long = "utf-16")]
+    utf_16_strings: bool,
 
     #[structopt(name = "connection-string")]
     connection_string: String,
@@ -151,7 +155,10 @@ fn main() -> Result<(), Problem> {
     let args = Cli::from_args();
     init_logger(&args.logging, vec![module_path!(), "odbc_iter"]);
 
-    let mut db = Odbc::connect(&args.connection_string).or_failed_to("connect to database");
+    let mut db = Odbc::connect_with_settings(&args.connection_string, Settings {
+        utf_16_strings: args.utf_16_strings,
+        .. Default::default()
+    }).or_failed_to("connect to database");
     let mut db = db.handle();
 
     match args.output {
